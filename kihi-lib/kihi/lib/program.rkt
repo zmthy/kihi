@@ -1,17 +1,13 @@
 #lang racket
 
-(require "primitive.rkt"
+(require "../private/program.rkt"
+         "primitive.rkt"
          "stack.rkt")
 
-(provide program
-         program?
+(provide program?
          (contract-out [compose (-> program? program? program?)]
                        [join (-> program? program?)]
                        [Y (-> program? any)]))
-
-(define program list)
-
-(define program? list?)
 
 (define (compose f g)
   (program apply f apply g))
@@ -23,4 +19,7 @@
   (program apply f copy))
 
 (define (Y f)
-  (values before copy before (program apply under (program before before (program apply) copy))))
+  (values before copy before
+          (program apply under
+                   (program before before
+                            (program apply) copy))))

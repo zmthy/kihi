@@ -1,8 +1,8 @@
 #lang racket
 
-(require "primitive.rkt"
-         "stack.rkt"
-         "program.rkt")
+(require "../private/program.rkt"
+         "primitive.rkt"
+         "stack.rkt")
 
 (provide (rename-out [cons pair])
          pair?

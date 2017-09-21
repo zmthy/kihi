@@ -1,8 +1,8 @@
 #lang racket
 
 (require (prefix-in racket/ racket)
-         "primitive.rkt"
-         "program.rkt")
+         "../private/program.rkt"
+         "primitive.rkt")
 
 (provide (rename-out [empty nil]
                      [make-list repeat])

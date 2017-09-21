@@ -1,7 +1,7 @@
 #lang racket
 
-(require "primitive.rkt"
-         "program.rkt")
+(require "../private/program.rkt"
+         "primitive.rkt")
 
 (provide none
          some

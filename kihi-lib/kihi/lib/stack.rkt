@@ -1,12 +1,13 @@
 #lang racket
 
-(require "primitive.rkt")
+(require "primitive.rkt"
+         "../private/program.rkt")
 
 (provide swap
-         (contract-out [apply-with (-> any/c list? any)]
-                       [under (-> list? any/c any)]
-                       [under₂ (-> list? any/c any/c any)]
-                       [over (-> list? any/c any)])
+         (contract-out [apply-with (-> any/c program? any)]
+                       [under (-> program? any/c any)]
+                       [under₂ (-> program? any/c any/c any)]
+                       [over (-> program? any/c any)])
          swap-over
          swap-under
          copy-over

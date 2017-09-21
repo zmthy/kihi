@@ -1,10 +1,10 @@
 #lang racket
 
-(require "private/stream.rkt"
+(require "private/program.rkt"
+         "private/stream.rkt"
          "lib/primitive.rkt"
          "lib/stack.rkt"
-         (except-in "lib/program.rkt"
-                    program)
+         "lib/program.rkt"
          "lib/boolean.rkt"
          "lib/number.rkt"
          "lib/string.rkt"
@@ -31,4 +31,4 @@
   (#%module-begin (stream (list forms ...))))
 
 (define-syntax-rule (app forms ...)
-  (list forms ...))
+  (program forms ...))

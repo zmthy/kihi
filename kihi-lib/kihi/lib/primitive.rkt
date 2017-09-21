@@ -1,21 +1,22 @@
 #lang racket
 
-(require (prefix-in racket/ racket))
+(require (prefix-in racket/ racket)
+         "../private/program.rkt")
 
-(provide (contract-out [apply (-> list? any)]
-                       [before (-> list? any/c list?)]
-                       [after (-> list? any/c list?)])
+(provide (contract-out [apply (-> program? any)]
+                       [before (-> program? any/c program?)]
+                       [after (-> program? any/c program?)])
          copy
          drop)
 
 (define (apply f)
-  (racket/apply values f))
+  (racket/apply values (program->list f)))
 
 (define (before f x)
-  (list apply f x))
+  (program apply f x))
 
 (define (after f x)
-  (cons x f))
+  (list->program (cons x (program->list f))))
 
 (define (copy x)
   (values x x))
