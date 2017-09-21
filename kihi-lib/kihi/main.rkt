@@ -1,7 +1,8 @@
 #lang racket
 
-(require "private/program.rkt"
-         "private/stream.rkt"
+(require "private/syntax.rkt"
+         "private/program.rkt"
+         "private/runtime.rkt"
          "lib/primitive.rkt"
          "lib/stack.rkt"
          "lib/program.rkt"
@@ -12,8 +13,7 @@
          "lib/option.rkt"
          "lib/list.rkt")
 
-(provide (rename-out [module-begin #%module-begin]
-                     [app #%app])
+(provide (rename-out [module-begin #%module-begin])
          #%datum
          #%top
          #%top-interaction
@@ -27,8 +27,8 @@
                        "lib/option.rkt"
                        "lib/list.rkt"))
 
-(define-syntax-rule (module-begin forms ...)
-  (#%module-begin (stream forms ...)))
-
-(define-syntax-rule (app forms ...)
-  (program forms ...))
+(define-syntax (module-begin stx)
+  (syntax-case stx ()
+    [(_ forms ...)
+     (with-syntax ([(forms ...) (begin-syntax #'(forms ...))])
+       #'(#%module-begin forms ...))]))

@@ -4,8 +4,13 @@
 
 @local-table-of-contents[]
 
+@(define-syntax-rule (kihi forms ...)
+   (racket forms ...))
 
-@section[#:tag "primitive"]{Primitives}
+
+@section[#:tag "Core"]{Core}
+
+@subsection[#:tag "primitive"]{Primitives}
 
 The entire semantics of Kihi depend on five primitive operations.  All
 of the other program and data definitions in the language can be
@@ -46,7 +51,7 @@ represented as some combination of the following programs.
 }
 
 
-@section[#:tag "stack"]{Stack}
+@subsection[#:tag "stack"]{Stack}
 
 Consumption of values is ordered like a stack, and so the values can be
 manipulated like a data structure.  The following programs change the
@@ -92,7 +97,7 @@ than the head of the stack.
 }
 
 
-@section[#:tag "program"]{Programs}
+@subsection[#:tag "program"]{Programs}
 
 @defthing[program? (∀ (A) (A → Boolean))]{
   Determine if a value is a program.
@@ -105,25 +110,59 @@ than the head of the stack.
 @defthing[flip (∀ (A B s t) ((A B s → t) → (B A s → t)))]{
   Swap the order of the first two inputs of a program.
 
-  Equivalent to composing the function with @racket[(swap)].
+  Equivalent to composing the program with @kihi[(swap)].
 }
 
 @defthing[join (∀ (A s t) ((A A s → t) → (A s → t)))]{
   Duplicate the first input of a program.
 
-  Equivalent to composing the function with @racket[(copy)].
+  Equivalent to composing the program with @kihi[(copy)].
 }
 
 @defthing[Y (∀ (A s t) (((s → t) s → t) → (s → t)))]{
   The Y combinator.  Apply a program to the result of this application.
 
-  This allows a function to refer to itself, as its first input will be
+  This allows a program to refer to itself, as its first input will be
   its own definition, with the same value bound in the same way inside
   of itself.
 }
 
 
-@section[#:tag "boolean"]{Booleans}
+@section[#:tag "syntax"]{Syntax}
+
+@subsection[#:tag "binding"]{Binding}
+
+@defform[(define (f x ...) (t ...))]{
+  Define a program and bind it to a name @kihi[f].  Invoking the name
+  @kihi[f] will execute the program @kihi[(t ...)].  If extra names
+  @kihi[x ...] are defined, the program will also consume the same
+  number of values before executing and pointwise bind those names to
+  the values.
+}
+
+@defform[(bind (x ...) (t ...))]{
+  Consume as many values as there are names @kihi[x ...], and then
+  apply the following program @kihi[(t ...)] with the names pointwise
+  bound to the values.
+}
+
+@defform[(let ([(x ...) t ...] ...) (t ...))]{
+  Like @kihi[bind], but the bound values are defined directly after the
+  names they are bound by rather than the program they are bound in.
+  Multiple different sets of bindings can be made at once, and bound
+  names are also available in the bindings the follow them.
+
+  The number of names in a binding does not need to match the number of
+  values returned by the terms that follow it, so bindings can also
+  share values through the stack: the bindings @kihi[([(x y) a b])],
+  @kihi[([() a b] [(x y)])], and @kihi[([(x) a b] [(y)])] are all
+  equivalent, binding @kihi[x] to @kihi[a] and @kihi[y] to @kihi[b].
+}
+
+
+@section[#:tag "data"]{Data Structures}
+
+@subsection[#:tag "boolean"]{Booleans}
 
 @defthing[boolean? (∀ (A) (A → Boolean))]{
   Determine if a value is a boolean.
@@ -143,7 +182,7 @@ than the head of the stack.
 
 
 
-@section[#:tag "number"]{Numbers}
+@subsection[#:tag "number"]{Numbers}
 
 @defthing[number? (∀ (A) (A → Boolean))]{
   Determine if a value is a number.
@@ -166,7 +205,7 @@ than the head of the stack.
 }
 
 
-@section[#:tag "string"]{Strings}
+@subsection[#:tag "string"]{Strings}
 
 @defthing[string? (∀ (A) (A → Boolean))]{
   Determine if a value is a string.
@@ -181,12 +220,12 @@ than the head of the stack.
 }
 
 
-@section[#:tag "pair"]{Pairs}
+@subsection[#:tag "pair"]{Pairs}
 
 Pairs are less valuable than in languages where functions can only
 return one value, but it is still useful to be able to generically group
 values together.  A pair can be directly deconstructed with
-@racket[unpair], which returns both of the values in the pair.
+@kihi[unpair], which returns both of the values in the pair.
 
 @defthing[pair (∀ (A B) (A B → Pair A B))]{
   Construct a pair from the top two values.
@@ -218,13 +257,13 @@ values together.  A pair can be directly deconstructed with
 }
 
 
-@section[#:tag "option"]{Options}
+@subsection[#:tag "option"]{Options}
 
 An option represents the potential for a missing value.  Either there is
-@racket[some] value, or there is @racket[none].  The value cannot be
+@kihi[some] value, or there is @kihi[none].  The value cannot be
 accessed directly, since it might not exist, but you can apply a program
 to the value on the condition that the value exists with
-@racket[option/fold].
+@kihi[option/fold].
 
 @defthing[none (∀ (A) (→ Option A))]{
   The empty option value.
@@ -257,7 +296,7 @@ to the value on the condition that the value exists with
 }
 
 
-@section[#:tag "list"]{Lists}
+@subsection[#:tag "list"]{Lists}
 
 @defthing[nil (∀ (A) (→ List A))]{
   The empty list value.

@@ -2,12 +2,13 @@
 
 (require "split.rkt")
 
-(provide stream)
+(provide run)
 
-(define (stream . forms)
-  (stream-loop empty forms))
+(define (run . forms)
+  (run-loop empty forms))
 
-(define (stream-loop results forms)
+
+(define (run-loop results forms)
   (match forms
     ;; If there are no forms left, return the results in the order they arrived.
     [(list)
@@ -17,15 +18,15 @@
     [(cons term stack)
      (cond
        [(procedure? term)
-        (stream-loop results (execute term stack))]
+        (run-loop results (execute term stack))]
        [else
-        (stream-loop (cons term results) stack)])]
+        (run-loop (cons term results) stack)])]
     ;; If the tail of the forms list turns out to be a procedure, the stack ran
     ;; out of values before if could finish evaluation.  The resulting curried
     ;; procedure represents the rest of the computation once more values become
     ;; available.  In this case, the procedure is the last result of the stream.
     [(? procedure?)
-     (stream-loop (cons forms results) empty)]))
+     (run-loop (cons forms results) empty)]))
 
 (define (execute term stack)
   (let ([arity (match (procedure-arity term)
