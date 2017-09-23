@@ -20,6 +20,8 @@
 
   (define (lookup-expand form)
     (case (syntax-e form)
+      ['require (values expand-require cons-left)]
+      ['provide (values expand-provide cons-left)]
       ['define (values expand-define cons-left)]
       ['bind (values expand-bind cons-right)]
       ['let (values expand-let cons-right)]
@@ -50,6 +52,14 @@
          (output-form form def-forms expr-forms))]
       [(list)
        (values empty empty)]))
+
+  (define (expand-require s)
+    (with-syntax ([(s ...) s])
+      #'(require s ...)))
+
+  (define (expand-provide s)
+    (with-syntax ([(s ...) s])
+      #'(provide s ...)))
 
   (define (expand-define f p)
     (with-syntax ([(f x ...) f]

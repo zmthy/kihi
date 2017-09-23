@@ -17,6 +17,16 @@
          #%datum
          #%top
          #%top-interaction
+         only-in
+         except-in
+         prefix-in
+         rename-in
+         relative-in
+         all-defined-out
+         all-from-out
+         rename-out
+         except-out
+         prefix-out
          (all-from-out "lib/primitive.rkt"
                        "lib/stack.rkt"
                        "lib/program.rkt"

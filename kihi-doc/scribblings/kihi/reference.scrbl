@@ -130,6 +130,16 @@ than the head of the stack.
 
 @section[#:tag "syntax"]{Syntax}
 
+@subsection[#:tag "modules"]{Modules}
+
+@defform[(require (s ...))]{
+  Import definitions as per the Racket require specs (@kihi[s ...]).
+}
+
+@defform[(provide (s ...))]{
+  Export definitions as per the Racket provide specs (@kihi[s ...]).
+}
+
 @subsection[#:tag "binding"]{Binding}
 
 @defform[(define (f x ...) (t ...))]{
