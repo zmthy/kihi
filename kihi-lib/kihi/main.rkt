@@ -28,7 +28,7 @@
                        "lib/list.rkt"))
 
 (define-syntax-rule (module-begin forms ...)
-  (#%module-begin (stream (list forms ...))))
+  (#%module-begin (stream forms ...)))
 
 (define-syntax-rule (app forms ...)
   (program forms ...))
