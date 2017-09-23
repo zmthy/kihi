@@ -38,7 +38,5 @@
                        "lib/list.rkt"))
 
 (define-syntax (module-begin stx)
-  (syntax-case stx ()
-    [(_ forms ...)
-     (with-syntax ([(forms ...) (begin-syntax #'(forms ...))])
-       #'(#%module-begin forms ...))]))
+  (with-syntax ([(_ forms ...) stx])
+    #`(#%module-begin #,@(begin-syntax #'(forms ...)))))

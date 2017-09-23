@@ -1,6 +1,10 @@
 #lang racket
 
-(provide splitf-at)
+(provide split-at
+         splitf-at)
+
+(define (split-at lst pos)
+  (splitf-at lst (const #t) pos))
 
 (define (splitf-at lst pred pos)
   (split empty lst pred pos))

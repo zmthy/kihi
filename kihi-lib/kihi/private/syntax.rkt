@@ -1,6 +1,10 @@
 #lang racket
 
-(require (for-syntax racket)
+(require (for-syntax (except-in racket
+                                split-at)
+                     syntax/parse
+                     (only-in "split.rkt"
+                              split-at))
          "program.rkt"
          "runtime.rkt")
 
@@ -13,10 +17,7 @@
 
   (define (expand-form stx over)
     (let-values ([(def-forms expr-forms) (expand-all (syntax-e stx))])
-      (with-syntax ([(def-forms ...) def-forms]
-                    [(expr-forms ...) expr-forms]
-                    [over over])
-        #'(def-forms ... (over expr-forms ...)))))
+      #`(#,@def-forms (#,over #,@expr-forms))))
 
   (define (lookup-expand form)
     (case (syntax-e form)
@@ -26,14 +27,7 @@
       ['bind (values expand-bind cons-right)]
       ['let (values expand-let cons-right)]
       [else
-       (values
-        (λ ()
-          (syntax-case form ()
-            [(forms ...)
-             (with-syntax ([(body ...) (expand-form form #'program)])
-               #`(λ () body ...))]
-            [else form]))
-        cons-right)]))
+       (values (expand-expr form) cons-right)]))
 
   (define (cons-left x a b)
     (values (cons x a) b))
@@ -44,41 +38,62 @@
   (define (expand-all forms)
     (match forms
       [(cons form forms)
-       (let*-values ([(expand-form output-form) (lookup-expand form)]
-                     [(arity) (procedure-arity expand-form)]
-                     [(args forms) (split-at forms arity)]
-                     [(form) (apply expand-form args)]
+       (let*-values ([(consume-forms output-form) (lookup-expand form)]
+                     [(arity) (procedure-arity consume-forms)]
+                     [(args forms remaining) (split-at forms (sub1 arity))]
+                     [(context) (datum->syntax form (cons form args))]
+                     [(form) (if (zero? remaining)
+                                 (apply consume-forms context args)
+                                 (raise-syntax-error
+                                  #f
+                                  (format "not enough forms: expected ~a more"
+                                          remaining)
+                                  context))]
                      [(def-forms expr-forms) (expand-all forms)])
          (output-form form def-forms expr-forms))]
       [(list)
        (values empty empty)]))
 
-  (define (expand-require s)
-    (with-syntax ([(s ...) s])
-      #'(require s ...)))
+  (define ((expand-expr form) ctx)
+    (syntax-parse form
+      #:context ctx
+      [(forms ...) #`(thunk #,@(expand-form form #'program))]
+      [else form]))
 
-  (define (expand-provide s)
-    (with-syntax ([(s ...) s])
-      #'(provide s ...)))
+  (define (expand-require ctx s)
+    (syntax-parse s
+      #:context ctx
+      [(s ...) #'(require s ...)]))
 
-  (define (expand-define f p)
-    (with-syntax ([(f x ...) f]
-                  [(p ...) p])
-      #'(define (f x ...) (run p ...))))
+  (define (expand-provide ctx s)
+    (syntax-parse s
+      #:context ctx
+      [(s ...) #'(provide s ...)]))
 
-  (define (expand-bind b p)
-    (with-syntax ([(x ...) b]
-                  [(p ...) p])
-      #'(λ (x ...) (run p ...))))
+  (define (expand-define ctx s p)
+    (syntax-parse s
+      #:context ctx
+      [(f:id x:id ...) (syntax-parse p
+                         #:context ctx
+                         [(t ...)
+                          #'(define (f x ...) (run t ...))])]))
 
-  (define (expand-let b p)
-    (with-syntax ([r (expand-let* b p)])
-      #'(λ () r)))
+  (define (expand-bind ctx b p)
+    (syntax-parse b
+      #:context ctx
+      [(x:id ...) (syntax-parse p
+                    #:context ctx
+                    [(t ...)
+                     #'(λ (x ...) (run t ...))])]))
 
-  (define (expand-let* b p)
-    (syntax-case b ()
-      [() (with-syntax ([(p ...) p])
-            #'(run p ...))]
-      [([(x ...) t ...] b ...)
-       (with-syntax ([(p ...) (expand-let #'(b ...) p)])
-         #'(run (λ (x ...) (p ...)) t ...))])))
+  (define (expand-let ctx b p)
+    #`(thunk #,(expand-let* ctx b p)))
+
+  (define (expand-let* ctx b p)
+    (syntax-parse b
+      #:context ctx
+      [() (syntax-parse p
+            #:context ctx
+            [(t ...) #'(run t ...)])]
+      [([(x:id ...) t ...] b ...)
+       #`(run (λ (x ...) #,(expand-let #'(b ...) p)) t ...)])))
