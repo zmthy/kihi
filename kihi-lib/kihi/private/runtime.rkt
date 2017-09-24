@@ -29,25 +29,35 @@
      (run-loop (cons forms results) empty)]))
 
 (define (execute term stack)
-  (let ([arity (match (procedure-arity term)
-                 [(? number? arity) arity]
-                 [(arity-at-least arity) arity]
-                 [(cons arity _) arity])])
-    (let*-values ([(args stack remaining) (collect arity stack)])
-      (if (zero? remaining)
-          (call-with-values
-           (λ () (apply term args))
-           (λ result
-             (append (filter (not/c void?) result) stack)))
-          ;; There were not enough values left on the stack to apply the
-          ;; procedure.  Return a curried form instead.
-          (procedure-reduce-arity (apply curry term args) remaining)))))
+  (let*-values ([(arity) (match (procedure-arity term)
+                           [(? number? arity) arity]
+                           [(arity-at-least arity) arity]
+                           [(cons arity _) arity])]
+                [(args stack remaining) (collect arity stack)])
+    (if (zero? remaining)
+        (call-with-values
+         (λ () (apply term args))
+         (λ result
+           (append (filter (not/c void?) result) stack)))
+        ;; There were not enough values left on the stack to apply the
+        ;; procedure.  Return a curried form instead.
+        (let ([delayed (procedure-rename
+                        (procedure-reduce-arity (apply curry term args)
+                                                remaining)
+                        (object-name term))])
+          (if (procedure? stack)
+              ;; Another form has already gotten delayed, so delay this one too
+              ;; and forward arguments to the initially delayed form.
+              (procedure-rename
+               (compose (curry run delayed) stack)
+               (object-name stack))
+              delayed)))))
 
 (define (collect arity stack)
   (if (procedure? stack)
-    (values stack empty)
-    (let*-values ([(vals leftover remaining)
-                   (splitf-at stack (negate procedure?) arity)])
+    (values empty stack arity)
+    (let-values ([(vals leftover remaining)
+                  (splitf-at stack (negate procedure?) arity)])
       (match leftover
         ;; We have collected enough values, or there is nothing left.
         [(or (? (const (zero? remaining)))
