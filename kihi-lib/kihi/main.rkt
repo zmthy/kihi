@@ -13,10 +13,10 @@
          "lib/option.rkt"
          "lib/list.rkt")
 
-(provide (rename-out [module-begin #%module-begin])
+(provide (rename-out [module-begin #%module-begin]
+                     [top-interaction #%top-interaction])
          #%datum
          #%top
-         #%top-interaction
          only-in
          except-in
          prefix-in
@@ -40,3 +40,8 @@
 (define-syntax (module-begin stx)
   (with-syntax ([(_ forms ...) stx])
     #`(#%module-begin #,@(begin-syntax #'(forms ...)))))
+
+(define-syntax (top-interaction stx)
+  (syntax-case stx ()
+    [(_ forms ...) #`(begin #,@(begin-syntax #'(forms ...)))]
+    [(_ . form) #'form]))
