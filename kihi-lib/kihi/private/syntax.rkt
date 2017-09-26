@@ -26,6 +26,7 @@
       ['define (values expand-define cons-left)]
       ['bind (values expand-bind cons-right)]
       ['let (values expand-let cons-right)]
+      ['λ (values expand-lambda cons-right)]
       [else
        (values (expand-expr form) cons-right)]))
 
@@ -85,6 +86,9 @@
                     #:context ctx
                     [(t ...)
                      #'(λ (x ...) (run t ...))])]))
+
+  (define (expand-lambda ctx b p)
+    #`(program #,(expand-bind ctx b p)))
 
   (define (expand-let ctx b p)
     #`(thunk #,(expand-let* ctx b p)))

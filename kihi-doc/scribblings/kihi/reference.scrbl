@@ -152,8 +152,15 @@ than the head of the stack.
 
 @defform[(bind (x ...) (t ...))]{
   Consume as many values as there are names @kihi[x ...], and then
-  apply the following program @kihi[(t ...)] with the names pointwise
-  bound to the values.
+  apply the program @kihi[(t ...)] with the names pointwise bound to the
+  values.
+}
+
+@defform[(λ (x ...) (t ...))]{
+  A program that, when applied, consumes as many values as there are
+  names @kihi[x ...], and then applies the program @kihi[(t ...)] with
+  the names pointwise bound to the values.  Equivalent to using
+  @kihi[bind] directly inside of a program literal.
 }
 
 @defform[(let ([(x ...) t ...] ...) (t ...))]{
