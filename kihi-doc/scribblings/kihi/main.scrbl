@@ -2,7 +2,7 @@
 
 @(require scribble/core)
 
-@title{Te Reo Kihi}
+@title{The Kihi Language}
 @author{@author+email["Timothy Jones" "tim@zmthy.net"]}
 @defmodule[kihi #:lang]
 
