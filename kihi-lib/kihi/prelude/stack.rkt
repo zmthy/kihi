@@ -3,11 +3,11 @@
 require (kihi/prelude/primitive
          racket/contract)
 
-provide (contract-out ([apply-with (-> any/c procedure? any)]
-                       [under (-> procedure? any/c any)]
-                       [under₂ (-> procedure? any/c any/c any)]
-                       [over (-> procedure? any/c any)]
-                       [split (-> procedure? procedure? any/c any)])
+provide (apply-with
+         under
+         under₂
+         over
+         split
          swap
          swap₂
          swap-over
@@ -21,16 +21,16 @@ define (swap x y)
 define (swap₂ x y z)
   (z y x)
 
-define (apply-with x f)
+define (apply-with x (f))
   (f x)
 
-define (under f x)
+define (under (f) x)
   (x f)
 
-define (under₂ f x y)
+define (under₂ (f) x y)
   (x y f)
 
-define (over f x)
+define (over (f) x)
   (swap x f)
 
 define (swap-over x y z)
@@ -45,5 +45,5 @@ define (copy-over x y)
 define (copy-under x y)
   (x y x)
 
-define (split f g x)
+define (split (f) (g) x)
   (f x g x)

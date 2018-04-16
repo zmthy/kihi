@@ -5,22 +5,18 @@ require (kihi/prelude/primitive
          racket/contract)
 
 provide (pair?
-         rename-out ([cons pair])
-         contract-out ([unpair (-> pair? any)]
-                       [rename car first
-                               (-> pair? any)]
-                       [rename cdr second
-                               (-> pair? any)]
-                       [rename fold pair/fold
-                               (->* (procedure?) (pair?) any)]
-                       [rename map pair/map
-                               (->* (procedure? procedure?) (pair?) any)]))
+         unpair
+         rename-out ([cons pair]
+                     [car first]
+                     [cdr second]
+                     [fold pair/fold]
+                     [map pair/map]))
 
 define (unpair)
   (car under (cdr) copy)
 
-define (fold f)
+define (fold (f))
   (f unpair)
 
-define (map f g)
+define (map (f) (g))
   (fold (f under (g)))

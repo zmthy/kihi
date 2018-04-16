@@ -133,6 +133,11 @@ than the head of the stack.
   own fixed point.
 }
 
+@defthing[with-arity (∀ (s t) ((s → t) Number s → t))]{
+  Apply a Racket procedure, providing as many values from the stack as
+  specified by the given number.
+}
+
 
 @section[#:tag "syntax"]{Syntax}
 
@@ -178,13 +183,6 @@ useful to use syntax that is not special-cased in the expander.
   Escape to a Racket statement.  Pulls the form @racket[(f t ...)] out
   to the surrounding begin, which means that it will execute before the
   surrounding expressions.
-}
-
-@defform[(arity n (f))]{
-  Call the function @kihi[f] with the arity @kihi[n].  This is necessary
-  because @racket[procedure-reduce-arity] cannot be used on a named
-  procedure in Kihi because the value of a procedure can never be
-  directly referenced.
 }
 
 @subsection[#:tag "modules"]{Modules}

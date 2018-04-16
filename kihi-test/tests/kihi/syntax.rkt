@@ -30,6 +30,3 @@ test-case "λ"
 
 test-case "match"
   (check-true (match ([1 #f] [2 #t]) 2) "match")
-
-test-case "arity"
-  (check-equal? (arity 2 (racket:+) 1 2) (3) "arity")

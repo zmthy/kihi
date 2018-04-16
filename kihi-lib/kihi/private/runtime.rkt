@@ -5,9 +5,10 @@
 (provide run-values
          run-print
          run-stream
-         (rename-out [splice-program program])
-         program-thunk
-         execute)
+         program
+         execute
+         execute-if-procedure
+         no-execute)
 
 (define (run-values . forms)
   (match (stream->list (apply run-stream forms))
@@ -21,54 +22,37 @@
 (define (run-stream . forms)
   (run-forms (in-list (map execute-if-procedure forms))))
 
-(struct program (body)
-  #:property prop:procedure (match-lambda*
-                              [(cons (program body) args)
-                               (apply run-values (append body args))])
-  #:methods gen:custom-write
-  [(define write-proc
-     (make-constructor-style-printer
-      (const 'program)
-      (match-lambda [(program body) body])))])
-
-(define (splice-program . forms)
-  (program (foldr (match-lambda**
-                   [((program body) forms) (append body forms)]
-                   [(value forms) (cons value forms)])
-                  empty
-                  forms)))
-
-(struct program-thunk (thunk)
-  #:property prop:procedure (match-lambda*
-                              [(cons (program-thunk thunk) args)
-                               (apply (thunk) args)]))
+(define-syntax-rule (program forms ...)
+  (procedure-rename (λ args (apply run-values forms ... args))
+                    'program))
 
 (struct execute (procedure)
+  #:property prop:object-name (const 'curried)
   #:property prop:procedure (struct-field-index procedure)
   #:methods gen:custom-write
-  [(define write-proc
-     (make-constructor-style-printer
-      (const 'execute)
-      (match-lambda
-        [(execute (program body)) (list body)]
-        [(execute proc) (list proc)])))])
+  [(define (write-proc e port mode)
+     (display "#<procedure:curried>" port))])
+
+(struct no-execute (value)
+  #:property prop:object-name (const #f)
+  #:property prop:procedure (struct-field-index value)
+  #:methods gen:custom-write
+  [(define (write-proc e port mode)
+     (display "#<procedure>" port))])
+
+(define wrap-with-execute?
+  (conjoin procedure? (negate execute?)))
 
 (define (execute-if-procedure value)
-  (if (and (procedure? value) (not (execute? value)))
-      (execute value)
-      value))
+  (match value
+    [(no-execute value) value]
+    [(? wrap-with-execute?) (execute value)]
+    [_ value]))
 
 (define (run-forms forms)
   (if (stream-empty? forms)
       forms
       (match/values (unstream forms)
-        ;; Special case programs, where we can dump the body into the stream.
-        [((execute (program body)) forms)
-         (run-forms
-          (stream-append (in-list (map execute-if-procedure body)) forms))]
-        ;; Special case program thunks, recursing immediately on the call.
-        [((execute (program-thunk thunk)) forms)
-         (run-forms (stream-cons (execute (thunk)) forms))]
         ;; Apply a procedure when it is wrapped in an execute structure.
         [((execute proc) forms)
          (run-procedure proc forms)]

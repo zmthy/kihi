@@ -1,6 +1,7 @@
 #lang kihi
 
-require ("../unit.rkt")
+require (prefix-in (racket: racket)
+         "../unit.rkt")
 
 test-case "compose"
   (check-equal? (apply compose (pair 1) (pair 2) nil)
@@ -20,3 +21,8 @@ test-case "join"
 test-case "rec"
   (check-true (rec (drop) #t)
               "rec")
+
+test-case "with-arity"
+(check-equal? (with-arity (racket:+) 2 1 2)
+              (3)
+              "with-arity")

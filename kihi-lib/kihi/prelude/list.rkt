@@ -3,6 +3,7 @@
 require (prefix-in (racket:
                     racket)
          kihi/prelude/primitive
+         kihi/prelude/procedure
          kihi/prelude/stack
          kihi/prelude/number
          racket/contract)
@@ -11,26 +12,23 @@ provide (list?
          list
          cons
          rename-out ([racket:empty nil]
-                     [racket:make-list repeat])
-         contract-out ([rename fold list/fold
-                               (->* (procedure?) (list?) any)]
-                       [rename map list/map
-                               (->* (procedure?) (list?) any)]
-                       [rename append list/append
-                               (->* () (list? list?) list?)]))
+                     [racket:make-list repeat]
+                     [fold list/fold]
+                     [map list/map]
+                     [append list/append]))
 
 define (list)
   (match
-    ([0 null]
+    ([0 racket:empty]
      [(app pred n) cons under (list n)]))
 
-define (fold f)
+define (fold (f))
   (match
    ([(list)]
     [(cons x xs) fold (f) xs f x]))
 
-define (map f)
+define (map (f))
   (fold (cons f) swap racket:empty)
 
 define (append)
-  (arity 2 (racket:append))
+  (with-arity (racket:append) 2)

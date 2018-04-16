@@ -5,19 +5,23 @@ require (kihi/prelude/primitive
          racket/contract)
 
 provide (procedure?
-         contract-out ([compose (-> procedure? procedure? procedure?)]
-                       [flip (-> procedure? procedure?)]
-                       [join (-> procedure? procedure?)]
-                       [rec (-> procedure? any)]))
+         compose
+         flip
+         join
+         rec
+         with-arity)
 
-define (compose f g)
+define (compose (f) (g))
   ((f g))
 
-define (flip f)
+define (flip (f))
   ((f swap))
 
-define (join f)
+define (join (f))
   ((f copy))
 
-define (rec f)
+define (rec (f))
   (f (rec (f)))
+
+define (with-arity f n)
+  (apply procedure-reduce-arity f n)

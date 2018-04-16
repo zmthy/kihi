@@ -4,6 +4,7 @@ require (prefix-in (racket:
                     racket/base)
          only-in (racket/match
                   define-match-expander)
+         kihi/prelude/procedure
          kihi/prelude/stack)
 
 provide (number?
@@ -12,13 +13,13 @@ provide (number?
          + - * /)
 
 define (+)
-  (arity 2 (racket:+))
+  (with-arity (racket:+) 2)
 
 define (-)
-  (arity 2 (racket:-))
+  (with-arity (racket:-) 2)
 
 define (*)
-  (arity 2 (racket:*))
+  (with-arity (racket:*) 2)
 
 define (/)
-  (arity 2 (racket:/))
+  (with-arity (racket:/) 2)

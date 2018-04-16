@@ -2,19 +2,19 @@
 
 require (racket/contract)
 
-provide (contract-out ([apply (-> procedure? any)]
-                       [left (-> procedure? any/c procedure?)]
-                       [right (-> procedure? any/c procedure?)])
+provide (apply
+         left
+         right
          copy
          drop)
 
-define (apply f)
+define (apply (f))
   (f)
 
-define (left f x)
+define (left (f) x)
   ((x f))
 
-define (right f x)
+define (right (f) x)
   ((f x))
 
 define (copy x)

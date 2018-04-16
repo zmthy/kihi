@@ -2,8 +2,9 @@
 
 require (only-in (racket/contract
                   or/c)
-         kihi/private/runtime
          kihi/prelude/primitive
+         kihi/prelude/procedure
+         kihi/private/runtime
          racket/contract)
 
 provide (none
@@ -11,22 +12,20 @@ provide (none
          none?
          some?
          option?
-         contract-out ([rename fold option/fold
-                               (->* (procedure?) (option?) any)]
-                       [rename map option/map
-                               (->* (procedure?) (option?) any)]))
+         rename-out ([fold option/fold]
+                     [map option/map]))
 
 struct (none)
 
 struct (some value)
 
 define (option?)
-  (apply arity 2 (or/c) (none?) (some?))
+  (apply with-arity (or/c) 2 (none?) (some?))
 
-define (fold f)
+define (fold (f))
   (match
     ([(some v) f v]
      [(none)]))
 
-define (map f)
+define (map (f))
   (fold (some f))
