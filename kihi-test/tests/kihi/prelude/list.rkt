@@ -19,7 +19,9 @@ test-case "list/fold"
   (check-true (list/fold (or) cons #t nil (#f)) "list/fold")
 
 test-case "list/map"
-  (check-true (first list/map (not) cons #f nil) "list/map")
+  (check-true (first list/map (not) cons #f nil) "list/map"
+   check-equal? (list/map (not) cons #t cons #f nil) cons #f cons #t nil "list/map"
+   check-equal? (first list/map (+) cons 3 nil 4) 7 "can interact with stack")
 
 test-case "list/append"
   (check-equal? (length list/append cons #f nil cons #f nil) (2) "list/append")

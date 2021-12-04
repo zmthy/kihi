@@ -22,13 +22,15 @@ define (list)
     ([0 racket:empty]
      [(app pred n) cons under (list n)]))
 
-define (fold (f))
+define (fold f)
   (match
    ([(list)]
-    [(cons x xs) fold (f) xs f x]))
+    [(cons x xs) fold f xs apply f x]))
 
-define (map (f))
-  (fold (cons f) swap racket:empty)
+define (map f)
+  (match
+   ([(list) racket:empty]
+    [(cons x xs) cons under (map f xs) apply f x]))
 
 define (append)
   (with-arity (racket:append) 2)
