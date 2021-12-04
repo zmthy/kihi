@@ -4,7 +4,8 @@ require (prefix-in (racket: racket/base)
          "unit.rkt")
 
 test-case "racket"
-  (check-true (racket (racket:if #t #t #f)) "racket")
+  (check-true (racket (racket:if #t #t #f)) "racket"
+   check-true (drop racket (values #f #t)) "multiple values")
 
 racket/stmt (define x #t)
 

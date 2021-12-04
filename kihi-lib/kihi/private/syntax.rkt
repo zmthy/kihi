@@ -29,7 +29,7 @@
       form))
 
   (define-syntax-rule (parse form body ...)
-    (syntax-parse form  body ...))
+    (syntax-parse form body ...))
 
   (define (begin-values form)
     (run-with #'run-values form))
@@ -47,7 +47,7 @@
   (define (lookup-expand form)
     (case (syntax-e form)
       ['racket (values expand-racket cons-right)]
-      ['racket/stmt (values expand-racket cons-left)]
+      ['racket/stmt (values expand-racket-direct cons-left)]
       ['require (values expand-require cons-left)]
       ['provide (values expand-provide cons-left)]
       ['define (values expand-define cons-left)]
@@ -97,9 +97,12 @@
              (program #,@exprs)))]
       [else form]))
 
-  (define (expand-racket form)
+  (define (expand-racket-direct form)
     (parse form
       [(t ...) #'(t ...)]))
+
+  (define (expand-racket form)
+    #`(thunk #,(expand-racket-direct form)))
 
   (define (expand-require form)
     (parse form
