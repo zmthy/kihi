@@ -27,7 +27,7 @@ define (test (f) (next) msg)
                 string/append "result count: " msg)
           (kihi next first results msg))))))
 
-define (test-case name body)
+define (test-case name (body))
   (racket (rackunit:test-case (kihi name) (kihi body)))
 
 define (check-true f)
