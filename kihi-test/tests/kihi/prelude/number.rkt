@@ -11,6 +11,21 @@ test-case "add1"
 test-case "sub1"
   (check-equal? (sub1 4) (3) "sub1")
 
+test-case "="
+  (check-true (= 2 2) "=")
+
+test-case "<"
+  (check-true (< 2 3) "<")
+
+test-case ">"
+  (check-true (> 3 2) ">")
+
+test-case "<="
+  (check-true (<= 2 3) "<=")
+
+test-case ">="
+  (check-true (>= 3 2) ">=")
+
 test-case "+"
   (check-equal? (+ 6 3) (9) "+")
 

@@ -10,7 +10,23 @@ require (prefix-in (racket:
 provide (number?
          rename-out ([add1 suc]
                      [sub1 pred])
+         = < > <= >=
          + - * /)
+
+define (=)
+  (with-arity (racket:=) 2)
+
+define (<)
+  (with-arity (racket:<) 2)
+
+define (>)
+  (with-arity (racket:>) 2)
+
+define (<=)
+  (with-arity (racket:<=) 2)
+
+define (>=)
+  (with-arity (racket:>=) 2)
 
 define (+)
   (with-arity (racket:+) 2)

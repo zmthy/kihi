@@ -4,6 +4,7 @@
          (except-in kihi/base
                     apply compose
                     if and or
+                    = < > <= >=
                     + - * /
                     list cons)
          kihi/prelude)
