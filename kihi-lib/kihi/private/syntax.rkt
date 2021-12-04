@@ -89,12 +89,15 @@
 
   (define ((expand-expr form))
     (parse form
-      [(form) #'(no-execute form)]
       [(_ ...)
-       (let-values ([(defs exprs) (expand-form form)])
-         #`(λ ()
-             #,@defs
-             (program #,@exprs)))]
+       (let*-values ([(defs exprs) (expand-form form)]
+                     [(wrapped) #`(thunk #,@defs
+                                         (program #,@exprs))])
+         (parse #`[#,defs #,exprs]
+           [[() (name:id)] #`(if (procedure? name)
+                                 (no-execute name)
+                                 #,wrapped)]
+           [else wrapped]))]
       [else form]))
 
   (define (expand-racket-direct form)
