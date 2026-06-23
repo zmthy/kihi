@@ -243,9 +243,9 @@ useful to use syntax that is not special-cased in the expander.
 
 @defform[(let x t ...)]{
   Binds @kihi[x] to the first value produced by the terms @kihi[t ...],
-  which are all evaluated with @kihi[x] in scope.  Because the binding
-  uses @racket[letrec], @kihi[x] may appear in the terms that define it,
-  enabling recursive and self-referential definitions.
+  which are all evaluated with @kihi[x] in scope.  @kihi[x] may appear
+  in the terms that define it, enabling recursive and self-referential
+  definitions.
 }
 
 @defform[(match ([p t ...] ...))]{
