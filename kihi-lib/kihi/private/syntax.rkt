@@ -169,16 +169,14 @@
     #`(thunk #,(expand-bind bindings body)))
 
   (define (expand-let x . body-forms)
-    (let*-values ([(defs exprs) (expand-all body-forms)])
-      (let ([tmp (generate-temporary x)])
-        (if (null? exprs)
-            #`(letrec ([#,x (void)]) #,@defs)
-            #`(execute (program
-                         (λ (#,tmp)
-                           (letrec ([#,x #,tmp])
-                             #,@defs
-                             (execute (program #,@(cdr exprs)))))
-                         #,(car exprs)))))))
+    (let-values ([(defs exprs) (expand-all body-forms)])
+      (if (empty? exprs)
+          #`(thunk #,@defs (void))
+          #`(thunk
+             (letrec ([#,x (void)])
+               #,@defs
+               (set! #,x (stream-first (run-stream #,@exprs)))
+               (apply values (stream->list (stream-rest (run-stream #,@exprs)))))))))
 
   (define (expand-match form)
     (parse form
