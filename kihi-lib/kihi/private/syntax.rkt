@@ -175,8 +175,14 @@
           #`(thunk
              (letrec ([#,x (void)])
                #,@defs
-               (set! #,x (stream-first (run-stream #,@exprs)))
-               (apply values (stream->list (stream-rest (run-stream #,@exprs)))))))))
+               (apply values
+                 (stream->list
+                   (run-forms
+                     (stream-cons (execute (λ (v) (set! #,x v)))
+                                  #,(foldr (λ (expr acc)
+                                             #`(stream-cons (execute-if-procedure #,expr) #,acc))
+                                           #'empty-stream
+                                           exprs))))))))))
 
   (define (expand-match form)
     (parse form

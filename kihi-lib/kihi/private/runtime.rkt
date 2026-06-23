@@ -5,6 +5,7 @@
 (provide run-values
          run-print
          run-stream
+         run-forms
          program
          execute
          execute-if-procedure
