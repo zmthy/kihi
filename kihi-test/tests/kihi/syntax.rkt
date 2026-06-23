@@ -24,7 +24,7 @@ test-case "bind"
   (check-true (bind (y) (not y) #f) "bind")
 
 test-case "let"
-  (check-true (let ([(y) #t]) (y)) "let")
+  (check-true (let y #t y) "let")
 
 test-case "λ"
   (check-true (apply λ (y) (y) #t) "lambda")

@@ -73,7 +73,10 @@
        (let*-values
            ([(consume-forms output-form) (lookup-expand form)]
             [(arity) (procedure-arity consume-forms)]
-            [(args forms remaining) (split-at forms arity)]
+            [(args forms remaining)
+             (if (arity-at-least? arity)
+                 (values forms '() 0)
+                 (split-at forms arity))]
             [(context) (datum->syntax form (cons form args))]
             [(form)
              (if (zero? remaining)
@@ -165,14 +168,17 @@
   (define (expand-lambda bindings body)
     #`(thunk #,(expand-bind bindings body)))
 
-  (define (expand-let bindings body)
-    (parse bindings
-      [() (parse body
-            [(t ...) #'(execute (program t ...))])]
-      [([(x:id ...) t ...] b ...)
-       #`(execute (program (λ (x ...)
-                             #,(expand-let #'(b ...) body))
-                           t ...))]))
+  (define (expand-let x . body-forms)
+    (let*-values ([(defs exprs) (expand-all body-forms)])
+      (let ([tmp (generate-temporary x)])
+        (if (null? exprs)
+            #`(letrec ([#,x (void)]) #,@defs)
+            #`(execute (program
+                         (λ (#,tmp)
+                           (letrec ([#,x #,tmp])
+                             #,@defs
+                             (execute (program #,@(cdr exprs)))))
+                         #,(car exprs)))))))
 
   (define (expand-match form)
     (parse form

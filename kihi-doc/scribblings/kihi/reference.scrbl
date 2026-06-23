@@ -241,17 +241,11 @@ useful to use syntax that is not special-cased in the expander.
   @kihi[bind] directly inside of a procedure literal.
 }
 
-@defform[(let ([(x ...) t ...] ...) (t ...))]{
-  Like @kihi[bind], but the bound values are defined directly after the
-  names they are bound by rather than the procedure they are bound in.
-  Multiple different sets of bindings can be made at once, and bound
-  names are also available in the bindings the follow them.
-
-  The number of names in a binding does not need to match the number of
-  values returned by the terms that follow it, so bindings can also
-  share values through the stack: the bindings @kihi[([(x y) a b])],
-  @kihi[([() a b] [(x y)])], and @kihi[([(x) a b] [(y)])] are all
-  equivalent, binding @kihi[x] to @kihi[a] and @kihi[y] to @kihi[b].
+@defform[(let x t ...)]{
+  Binds @kihi[x] to the first value produced by the terms @kihi[t ...],
+  which are all evaluated with @kihi[x] in scope.  Because the binding
+  uses @racket[letrec], @kihi[x] may appear in the terms that define it,
+  enabling recursive and self-referential definitions.
 }
 
 @defform[(match ([p t ...] ...))]{
