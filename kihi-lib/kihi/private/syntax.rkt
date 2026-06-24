@@ -176,12 +176,14 @@
                (apply values
                  (stream->list
                    (run-forms
-                     #,(foldr (λ (n acc) #`(stream-cons (execute (λ (v) (set! #,n v))) #,acc))
-                              (foldr (λ (expr acc)
-                                       #`(stream-cons (execute-if-procedure #,expr) #,acc))
-                                     #'empty-stream
-                                     exprs)
-                              names)))))))))
+                     (stream-cons
+                       #,(foldr (λ (n acc) #`(execute (λ (v) (set! #,n v) #,acc)))
+                                #'(void)
+                                names)
+                       #,(foldr (λ (expr acc)
+                                   #`(stream-cons (execute-if-procedure #,expr) #,acc))
+                                #'empty-stream
+                                exprs))))))))))
 
   (define (expand-match form)
     (parse form
