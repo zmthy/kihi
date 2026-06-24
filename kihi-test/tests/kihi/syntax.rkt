@@ -29,7 +29,8 @@ test-case "let"
    check-equal? (let (x y) 1 add1 x y) (2) "let* style")
 
 test-case "λ"
-  (check-true (apply λ (y) (y) #t) "lambda")
+  (check-true (apply λ (y) (y) #t) "lambda"
+   check-true (apply λ y (y) #t) "bare binding")
 
 test-case "match"
   (check-true (match ([1 #f] [2 #t]) 2) "match")

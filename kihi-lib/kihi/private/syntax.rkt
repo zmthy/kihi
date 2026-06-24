@@ -156,14 +156,15 @@
       [(x:id y:id ...) #'(struct x (y ...))]))
 
   (define (expand-lambda bindings body)
-    (parse #`[#,bindings #,body]
-      [[(x:id ...) (_ ...)]
-       (let-values ([(def-forms expr-forms) (expand-form body)])
-         #`(thunk
-             (λ #,(syntax-map flatten-binding #'(x ...))
-               (let #,(no-execute-bindings #'(x ...))
-                 #,@def-forms
-                 (execute (program #,@expr-forms))))))]))
+    (let ([names (or (syntax->list bindings) (list bindings))])
+      (parse #`[(#,@names) #,body]
+        [[(x:id ...) (_ ...)]
+         (let-values ([(def-forms expr-forms) (expand-form body)])
+           #`(thunk
+               (λ #,(syntax-map flatten-binding #'(x ...))
+                 (let #,(no-execute-bindings #'(x ...))
+                   #,@def-forms
+                   (execute (program #,@expr-forms))))))])))
 
   (define (expand-let x . body-forms)
     (let*-values ([(names) (or (syntax->list x) (list x))]
