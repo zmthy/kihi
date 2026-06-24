@@ -234,11 +234,15 @@ useful to use syntax that is not special-cased in the expander.
   the names pointwise bound to the values.
 }
 
-@defform[(let x t ...)]{
+@defform*[((let x t ...) (let (x ...) t ...))]{
   Binds @kihi[x] to the first value produced by the terms @kihi[t ...],
   which are all evaluated with @kihi[x] in scope.  @kihi[x] may appear
   in the terms that define it, enabling recursive and self-referential
   definitions.
+
+  When given a list of names @kihi[(x ...)], binds each name to successive
+  values produced by the terms, in order.  All names are in scope for the
+  full terms, enabling mutual recursion.
 }
 
 @defform[(match ([p t ...] ...))]{

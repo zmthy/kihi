@@ -24,7 +24,8 @@ test-case "let"
   (check-true (let y #t y) "basic"
    check-equal? (let fact (λ (n) (apply (match ([0 1] [m * m apply fact - m 1])) n)) apply fact 5) (120) "self-reference"
    check-true (let x #f let y (not x) y) "nested"
-   check-true (let x #f let x #t x) "shadowing")
+   check-true (let x #f let x #t x) "shadowing"
+   check-equal? (let (x y) 1 2 + x y) (3) "multi-variable")
 
 test-case "λ"
   (check-true (apply λ (y) (y) #t) "lambda")

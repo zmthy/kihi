@@ -166,20 +166,22 @@
                  (execute (program #,@expr-forms))))))]))
 
   (define (expand-let x . body-forms)
-    (let-values ([(defs exprs) (expand-all body-forms)])
+    (let*-values ([(names) (or (syntax->list x) (list x))]
+                  [(defs exprs) (expand-all body-forms)])
       (if (empty? exprs)
           #`(thunk #,@defs (void))
           #`(thunk
-             (letrec ([#,x (void)])
+             (letrec #,(map (λ (n) #`[#,n (void)]) names)
                #,@defs
                (apply values
                  (stream->list
                    (run-forms
-                     (stream-cons (execute (λ (v) (set! #,x v)))
-                                  #,(foldr (λ (expr acc)
-                                             #`(stream-cons (execute-if-procedure #,expr) #,acc))
-                                           #'empty-stream
-                                           exprs))))))))))
+                     #,(foldr (λ (n acc) #`(stream-cons (execute (λ (v) (set! #,n v))) #,acc))
+                              (foldr (λ (expr acc)
+                                       #`(stream-cons (execute-if-procedure #,expr) #,acc))
+                                     #'empty-stream
+                                     exprs)
+                              names)))))))))
 
   (define (expand-match form)
     (parse form
