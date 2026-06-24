@@ -52,7 +52,6 @@
       ['provide (values expand-provide cons-left)]
       ['define (values expand-define cons-left)]
       ['struct (values expand-struct cons-left)]
-      ['bind (values expand-bind cons-right)]
       ['let (values expand-let cons-right)]
       ['λ (values expand-lambda cons-right)]
       ['match (values expand-match cons-right)]

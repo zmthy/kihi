@@ -228,17 +228,10 @@ useful to use syntax that is not special-cased in the expander.
   names form the fields of the resulting struct.
 }
 
-@defform[(bind (x ...) (t ...))]{
-  Consume as many values as there are names @kihi[x ...], and then apply
-  the procedure @kihi[(t ...)] with the names pointwise bound to the
-  values.
-}
-
 @defform[(λ (x ...) (t ...))]{
   A procedure that, when applied, consumes as many values as there are
   names @kihi[x ...], and then applies the procedure @kihi[(t ...)] with
-  the names pointwise bound to the values.  Equivalent to using
-  @kihi[bind] directly inside of a procedure literal.
+  the names pointwise bound to the values.
 }
 
 @defform[(let x t ...)]{

@@ -20,9 +20,6 @@ test-case "struct"
   (struct (y x)
    check-true (y-x y #t) "struct")
 
-test-case "bind"
-  (check-true (bind (y) (not y) #f) "bind")
-
 test-case "let"
   (check-true (let y #t y) "basic"
    check-equal? (let fact (λ (n) (apply (match ([0 1] [m * m apply fact - m 1])) n)) apply fact 5) (120) "self-reference"
