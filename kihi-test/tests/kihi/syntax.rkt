@@ -14,7 +14,11 @@ test-case "racket/stmt"
 
 test-case "define"
   (define (y) (#t)
-   check-true (y) "define")
+   check-true (y) "procedure"
+   define z #t
+   check-true (z) "value"
+   define w (5)
+   check-equal? (apply w) (5) "procedure value")
 
 test-case "struct"
   (struct (y x)

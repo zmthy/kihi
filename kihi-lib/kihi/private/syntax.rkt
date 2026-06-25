@@ -142,6 +142,9 @@
 
   (define (expand-define bindings body)
     (parse bindings
+      [f:id
+       (with-context bindings
+         #`(define f #,((expand-expr body))))]
       [(f:id b ...)
        (let-values ([(def-forms expr-forms) (expand-form body)])
          (with-context bindings

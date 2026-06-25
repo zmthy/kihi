@@ -215,12 +215,17 @@ useful to use syntax that is not special-cased in the expander.
 
 @subsection[#:tag "binding"]{Binding}
 
-@defform[(define (f x ...) (t ...))]{
-  Define a procedure and bind the name @kihi[f] to it.  Invoking the
-  name @kihi[f] will execute the procedure @kihi[(t ...)].  If extra
-  names @kihi[x ...] are defined, the procedure will also consume the
-  same number of values before executing and pointwise bind those names
-  to the values.
+@defform*[((define (f x ...) (t ...)) (define x t))]{
+  When given a parenthesized name @kihi[(f x ...)], define a procedure
+  and bind the name @kihi[f] to it.  Invoking the name @kihi[f] will
+  execute the procedure @kihi[(t ...)].  If extra names @kihi[x ...] are
+  defined, the procedure will also consume the same number of values
+  before executing and pointwise bind those names to the values.
+
+  When given a bare name @kihi[x], bind @kihi[x] directly to the value
+  of the expression @kihi[t].  If @kihi[t] is a parenthesized procedure
+  literal, @kihi[x] is bound to the procedure itself rather than its
+  result.
 }
 
 @defform[(struct (s x ...))]{
