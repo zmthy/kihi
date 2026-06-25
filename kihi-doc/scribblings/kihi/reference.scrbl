@@ -228,10 +228,12 @@ useful to use syntax that is not special-cased in the expander.
   names form the fields of the resulting struct.
 }
 
-@defform[(λ (x ...) (t ...))]{
+@defform*[((λ (x ...) (t ...)) (λ x (t ...)))]{
   A procedure that, when applied, consumes as many values as there are
   names @kihi[x ...], and then applies the procedure @kihi[(t ...)] with
   the names pointwise bound to the values.
+
+  When given a single bare name @kihi[x], equivalent to @kihi[(λ (x) (t ...))].
 }
 
 @defform*[((let x t ...) (let (x ...) t ...))]{
