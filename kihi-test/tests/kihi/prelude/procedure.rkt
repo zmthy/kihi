@@ -23,6 +23,7 @@ test-case "rec"
               "rec")
 
 test-case "with-arity"
-(check-equal? (with-arity (racket:+) 2 1 2)
-              (3)
-              "with-arity")
+  (define plus (racket:+)
+   check-equal? (with-arity plus 2 1 2)
+                (3)
+                "with-arity")

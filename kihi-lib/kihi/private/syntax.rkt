@@ -92,14 +92,8 @@
   (define ((expand-expr form))
     (parse form
       [(_ ...)
-       (let*-values ([(defs exprs) (expand-form form)]
-                     [(wrapped) #`(thunk #,@defs
-                                         (program #,@exprs))])
-         (parse #`[#,defs #,exprs]
-           [[() (name:id)] #`(if (procedure? name)
-                                 (no-execute name)
-                                 #,wrapped)]
-           [else wrapped]))]
+       (let-values ([(defs exprs) (expand-form form)])
+         #`(thunk #,@defs (program #,@exprs)))]
       [else form]))
 
   (define (expand-racket-direct form)
@@ -144,7 +138,9 @@
     (parse bindings
       [f:id
        (with-context bindings
-         #`(define f #,((expand-expr body))))]
+         (parse body
+           [(name:id) #`(define f (no-execute name))]
+           [_ #`(define f #,((expand-expr body)))]))]
       [(f:id b ...)
        (let-values ([(def-forms expr-forms) (expand-form body)])
          (with-context bindings
