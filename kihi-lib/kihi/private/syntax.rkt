@@ -97,7 +97,7 @@
          #`(thunk #,@defs (program #,@exprs)))]
       [else form]))
 
-  (define (expand-with-arity ref n)
+  (define (expand-with-arity n ref)
     (parse ref
       [f:id #`(execute (procedure-reduce-arity f #,n))]))
 

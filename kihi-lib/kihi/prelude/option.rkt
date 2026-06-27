@@ -23,7 +23,7 @@ define is-none (none?)
 define is-some (some?)
 
 define (option?)
-  (apply with-arity or/c 2 is-none is-some)
+  (apply with-arity 2 or/c is-none is-some)
 
 define (fold (f))
   (match

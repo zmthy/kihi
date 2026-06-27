@@ -7,4 +7,4 @@ provide (string?
          string/append)
 
 define (string/append)
-  (with-arity string-append 2)
+  (with-arity 2 string-append)

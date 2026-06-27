@@ -180,7 +180,7 @@ useful to use syntax that is not special-cased in the expander.
   surrounding expressions.
 }
 
-@defform[(with-arity f n)]{
+@defform[(with-arity n f)]{
   Reduce the procedure named by the identifier @kihi[f] to the arity
   @kihi[n], producing a procedure that consumes @kihi[n] values from the
   stack and applies @kihi[f] to them.  Because @kihi[f] is taken as an

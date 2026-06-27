@@ -33,4 +33,4 @@ define (map f)
     [(cons x xs) cons under (map f xs) apply f x]))
 
 define (append)
-  (with-arity racket:append 2)
+  (with-arity 2 racket:append)

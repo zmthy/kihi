@@ -14,28 +14,28 @@ provide (number?
          + - * /)
 
 define (=)
-  (with-arity racket:= 2)
+  (with-arity 2 racket:=)
 
 define (<)
-  (with-arity racket:< 2)
+  (with-arity 2 racket:<)
 
 define (>)
-  (with-arity racket:> 2)
+  (with-arity 2 racket:>)
 
 define (<=)
-  (with-arity racket:<= 2)
+  (with-arity 2 racket:<=)
 
 define (>=)
-  (with-arity racket:>= 2)
+  (with-arity 2 racket:>=)
 
 define (+)
-  (with-arity racket:+ 2)
+  (with-arity 2 racket:+)
 
 define (-)
-  (with-arity racket:- 2)
+  (with-arity 2 racket:-)
 
 define (*)
-  (with-arity racket:* 2)
+  (with-arity 2 racket:*)
 
 define (/)
-  (with-arity racket:/ 2)
+  (with-arity 2 racket:/)

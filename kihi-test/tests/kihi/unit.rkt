@@ -21,7 +21,7 @@ define (test (f) (next) msg)
     (λ results
       (let ([results (filter (negate void?) results)])
         (test-begin
-          (kihi with-arity rackunit:check 4
+          (kihi with-arity 4 rackunit:check
                 count-results results 1
                 string/append "result count: " msg)
           (kihi next first results msg))))))
@@ -30,7 +30,7 @@ define (test-case name (body))
   (racket (rackunit:test-case (kihi name) (kihi body)))
 
 define (check-true f)
-  (test f (with-arity rackunit:check-true 2))
+  (test f (with-arity 2 rackunit:check-true))
 
 define (check-equal? f g)
-  (test f (test g right (with-arity rackunit:check-equal? 3)))
+  (test f (test g right (with-arity 3 rackunit:check-equal?)))
