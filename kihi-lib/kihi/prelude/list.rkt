@@ -32,7 +32,5 @@ define (map f)
    ([(list) racket:empty]
     [(cons x xs) cons under (map f xs) apply f x]))
 
-define racket-append (racket:append)
-
 define (append)
-  (with-arity racket-append 2)
+  (with-arity racket:append 2)

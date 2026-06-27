@@ -13,39 +13,29 @@ provide (number?
          = < > <= >=
          + - * /)
 
-define equal (racket:=)
-define less (racket:<)
-define greater (racket:>)
-define less-equal (racket:<=)
-define greater-equal (racket:>=)
-define plus (racket:+)
-define minus (racket:-)
-define times (racket:*)
-define divide (racket:/)
-
 define (=)
-  (with-arity equal 2)
+  (with-arity racket:= 2)
 
 define (<)
-  (with-arity less 2)
+  (with-arity racket:< 2)
 
 define (>)
-  (with-arity greater 2)
+  (with-arity racket:> 2)
 
 define (<=)
-  (with-arity less-equal 2)
+  (with-arity racket:<= 2)
 
 define (>=)
-  (with-arity greater-equal 2)
+  (with-arity racket:>= 2)
 
 define (+)
-  (with-arity plus 2)
+  (with-arity racket:+ 2)
 
 define (-)
-  (with-arity minus 2)
+  (with-arity racket:- 2)
 
 define (*)
-  (with-arity times 2)
+  (with-arity racket:* 2)
 
 define (/)
-  (with-arity divide 2)
+  (with-arity racket:/ 2)

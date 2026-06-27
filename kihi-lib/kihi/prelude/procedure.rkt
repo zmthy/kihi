@@ -8,8 +8,7 @@ provide (procedure?
          compose
          flip
          join
-         rec
-         with-arity)
+         rec)
 
 define (compose (f) (g))
   ((f g))
@@ -22,6 +21,3 @@ define (join (f))
 
 define (rec (f))
   (f (rec (f)))
-
-define (with-arity f n)
-  (apply procedure-reduce-arity f n)

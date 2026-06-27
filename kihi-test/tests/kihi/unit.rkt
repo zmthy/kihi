@@ -3,7 +3,6 @@
 require (racket/function
          except-in (rackunit
                     test-case
-                    check
                     check-true
                     check-equal?)
          prefix-in [racket: racket]
@@ -12,10 +11,6 @@ require (racket/function
 provide (test-case
          check-true
          check-equal?)
-
-define check (rackunit:check)
-define checker-true (rackunit:check-true)
-define checker-equal? (rackunit:check-equal?)
 
 define count-results (= length)
 
@@ -26,7 +21,7 @@ define (test (f) (next) msg)
     (λ results
       (let ([results (filter (negate void?) results)])
         (test-begin
-          (kihi with-arity check 4
+          (kihi with-arity rackunit:check 4
                 count-results results 1
                 string/append "result count: " msg)
           (kihi next first results msg))))))
@@ -35,7 +30,7 @@ define (test-case name (body))
   (racket (rackunit:test-case (kihi name) (kihi body)))
 
 define (check-true f)
-  (test f (with-arity checker-true 2))
+  (test f (with-arity rackunit:check-true 2))
 
 define (check-equal? f g)
-  (test f (test g right (with-arity checker-equal? 3)))
+  (test f (test g right (with-arity rackunit:check-equal? 3)))

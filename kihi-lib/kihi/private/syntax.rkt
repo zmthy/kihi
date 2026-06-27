@@ -55,6 +55,7 @@
       ['let (values expand-let cons-right)]
       ['λ (values expand-lambda cons-right)]
       ['match (values expand-match cons-right)]
+      ['with-arity (values expand-with-arity cons-right)]
       [else (values (expand-expr form) cons-right)]))
 
   (define (cons-left x a b)
@@ -95,6 +96,10 @@
        (let-values ([(defs exprs) (expand-form form)])
          #`(thunk #,@defs (program #,@exprs)))]
       [else form]))
+
+  (define (expand-with-arity ref n)
+    (parse ref
+      [f:id #`(execute (procedure-reduce-arity f #,n))]))
 
   (define (expand-racket-direct form)
     (parse form

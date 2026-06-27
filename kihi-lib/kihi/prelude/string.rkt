@@ -6,7 +6,5 @@ provide (string?
          rename-out ([string-length string/length])
          string/append)
 
-define str-append (string-append)
-
 define (string/append)
-  (with-arity str-append 2)
+  (with-arity string-append 2)
