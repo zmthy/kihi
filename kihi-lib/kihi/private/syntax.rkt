@@ -182,7 +182,7 @@
                  (stream->list
                    (run-forms
                      (stream-cons
-                       #,(foldr (λ (n acc) #`(execute (λ (v) (set! #,n v) #,acc)))
+                       #,(foldr (λ (n acc) #`(execute (λ (v) (set! #,n (no-execute v)) #,acc)))
                                 #'(void)
                                 names)
                        #,(foldr (λ (expr acc)
