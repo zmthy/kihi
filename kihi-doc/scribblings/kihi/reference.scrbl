@@ -183,8 +183,8 @@ useful to use syntax that is not special-cased in the expander.
 @defform[(with-arity n f)]{
   Reduce the procedure named by the identifier @kihi[f] to the arity
   @kihi[n], producing a procedure that consumes @kihi[n] values from the
-  stack and applies @kihi[f] to them.  Because @kihi[f] is taken as an
-  unevaluated reference, it is written without surrounding parentheses,
+  stack and applies @kihi[f] to them.  @kihi[with-arity] is special-cased
+  in the expander: @kihi[f] names the procedure directly and is not run,
   which makes it possible to give a fixed arity to a Racket procedure
   that would otherwise accept a variable number of arguments.
 }

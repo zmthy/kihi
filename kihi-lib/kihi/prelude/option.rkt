@@ -19,11 +19,8 @@ struct (none)
 
 struct (some value)
 
-define is-none (none?)
-define is-some (some?)
-
 define (option?)
-  (apply with-arity 2 or/c is-none is-some)
+  (apply with-arity 2 or/c (none?) (some?))
 
 define (fold (f))
   (match
