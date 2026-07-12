@@ -2,10 +2,7 @@
 
 require (only-in (racket/contract
                   or/c)
-         kihi/prelude/primitive
-         kihi/prelude/procedure
-         kihi/private/runtime
-         racket/contract)
+         kihi/prelude/primitive)
 
 provide (none
          some
