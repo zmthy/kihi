@@ -126,18 +126,67 @@
       [(f s ...) #`(f #,@(slurp-left #'(s ...)))]
       [() #'()]))
 
+  ;; A binder is a bare name, which binds a value, or a name in parentheses,
+  ;; which binds a procedure that is executed when the name is used.  A list
+  ;; of binders is written in square brackets.
+  (define (square? stx)
+    (eqv? (syntax-property stx 'paren-shape) #\[))
+
+  (define (binder? stx)
+    (or (identifier? stx)
+        (and (not (square? stx))
+             (parse stx
+               [(x:id) #t]
+               [_ #f]))))
+
+  (define ((check-binder who) stx)
+    (if (binder? stx)
+        stx
+        (raise-syntax-error
+         who "expected a name or a name in parentheses" stx)))
+
+  (define (binders who stx)
+    (cond
+      [(square? stx) (map (check-binder who) (syntax->list stx))]
+      [(binder? stx) (list stx)]
+      [else
+       (raise-syntax-error
+        who "expected a name, a name in parentheses, or names in square brackets"
+        stx)]))
+
+  ;; A procedure signature is a name applied to one or more binders.
+  (define (signature? stx)
+    (and (not (square? stx))
+         (parse stx
+           [(f:id b ...+) #t]
+           [_ #f])))
+
   (define (flatten-binding binding)
     (parse binding
       [(x:id) #'x]
       [x:id #'x]))
 
+  (define (bind-value binding value)
+    (if (identifier? binding)
+        #`(no-execute #,value)
+        value))
+
   (define (no-execute-binding binding bindings)
-    (parse binding
-      [(x:id) bindings]
-      [x:id (cons #'[x (no-execute x)] bindings)]))
+    (if (identifier? binding)
+        (cons #`[#,binding #,(bind-value binding binding)] bindings)
+        bindings))
 
   (define (no-execute-bindings bindings)
-    (with-syntax-list (curry foldr no-execute-binding empty) bindings))
+    (foldr no-execute-binding empty bindings))
+
+  (define (expand-procedure who bindings body)
+    (unless (syntax->list body)
+      (raise-syntax-error who "expected a parenthesized procedure body" body))
+    (let-values ([(def-forms expr-forms) (expand-form body)])
+      #`(λ (#,@(map flatten-binding bindings) . args)
+          (let #,(no-execute-bindings bindings)
+            #,@def-forms
+            (apply run-values #,@expr-forms args)))))
 
   (define (expand-define bindings body)
     (parse bindings
@@ -147,48 +196,81 @@
            [(name:id) #`(define f (no-execute name))]
            [_ #`(define f #,((expand-expr body)))]))]
       [(f:id b ...)
-       (let-values ([(def-forms expr-forms) (expand-form body)])
+       #:when (not (square? bindings))
+       (let ([procedure (expand-procedure
+                         'define
+                         (map (check-binder 'define) (syntax->list #'(b ...)))
+                         body)])
          (with-context bindings
-           #`(define
-               (f #,@(syntax-map flatten-binding #'(b ...)) . args)
-               (let #,(no-execute-bindings #'(b ...))
-                 #,@def-forms
-                 (apply run-values #,@expr-forms args)))))]))
+           #`(define f #,procedure)))]
+      [_
+       (raise-syntax-error
+        'define "expected a name or a parenthesized procedure signature" bindings)]))
 
   (define (expand-struct bindings)
     (parse bindings
       [(x:id y:id ...) #'(struct x (y ...))]))
 
   (define (expand-lambda bindings body)
-    (let ([names (or (syntax->list bindings) (list bindings))])
-      (parse #`[(#,@names) #,body]
-        [[(x:id ...) (_ ...)]
-         (let-values ([(def-forms expr-forms) (expand-form body)])
-           #`(thunk
-               (λ #,(syntax-map flatten-binding #'(x ...))
-                 (let #,(no-execute-bindings #'(x ...))
-                   #,@def-forms
-                   (execute (program #,@expr-forms))))))])))
+    (let ([params (binders 'λ bindings)])
+      (unless (syntax->list body)
+        (raise-syntax-error 'λ "expected a parenthesized procedure body" body))
+      (let-values ([(def-forms expr-forms) (expand-form body)])
+        #`(thunk
+            (λ #,(map flatten-binding params)
+              (let #,(no-execute-bindings params)
+                #,@def-forms
+                (execute (program #,@expr-forms))))))))
 
-  (define (expand-let x . body-forms)
-    (let*-values ([(names) (or (syntax->list x) (list x))]
-                  [(defs exprs) (expand-all body-forms)])
+  (define (expand-let bindings . body-forms)
+    (if (signature? bindings)
+        (expand-let-procedure bindings body-forms)
+        (expand-let-values (binders 'let bindings) body-forms)))
+
+  ;; Bind a local procedure, in scope for its own body and the remaining terms.
+  (define (expand-let-procedure signature body-forms)
+    (when (empty? body-forms)
+      (raise-syntax-error 'let "expected a procedure body" signature))
+    (parse signature
+      [(f:id b ...)
+       (let*-values ([(procedure)
+                      (expand-procedure 'let
+                                        (map (check-binder 'let) (syntax->list #'(b ...)))
+                                        (first body-forms))]
+                     [(defs exprs) (expand-all (rest body-forms))])
+         #`(thunk
+            (letrec ([f #,procedure])
+              #,@defs
+              (apply values
+                (stream->list (run-forms #,(expr-stream exprs)))))))]))
+
+  ;; Bind successive values produced by the terms, which are evaluated with
+  ;; the names in scope.
+  (define (expand-let-values names body-forms)
+    (let-values ([(defs exprs) (expand-all body-forms)])
       (if (empty? exprs)
           #`(thunk #,@defs (void))
           #`(thunk
-             (letrec #,(map (λ (n) #`[#,n (void)]) names)
+             (letrec #,(map (λ (n) #`[#,(flatten-binding n) (void)]) names)
                #,@defs
                (apply values
                  (stream->list
                    (run-forms
                      (stream-cons
-                       #,(foldr (λ (n acc) #`(execute (λ (v) (set! #,n (no-execute v)) #,acc)))
+                       #,(foldr (λ (n acc)
+                                  #`(execute
+                                     (λ (v)
+                                       (set! #,(flatten-binding n) #,(bind-value n #'v))
+                                       #,acc)))
                                 #'(void)
                                 names)
-                       #,(foldr (λ (expr acc)
-                                   #`(stream-cons (execute-if-procedure #,expr) #,acc))
-                                #'empty-stream
-                                exprs))))))))))
+                       #,(expr-stream exprs))))))))))
+
+  (define (expr-stream exprs)
+    (foldr (λ (expr acc)
+             #`(stream-cons (execute-if-procedure #,expr) #,acc))
+           #'empty-stream
+           exprs))
 
   (define (expand-match form)
     (parse form

@@ -219,12 +219,18 @@ useful to use syntax that is not special-cased in the expander.
 
 @subsection[#:tag "binding"]{Binding}
 
-@defform*[((define (f x ...) (t ...)) (define x t))]{
-  When given a parenthesized name @kihi[(f x ...)], define a procedure
+The binding forms introduce names with @deftech{binders}.  A bare name
+@kihi[x] binds a value: using the name places the value on the stack.  A
+name in parentheses @kihi[(f)] binds a procedure: using the name executes
+it.  Several binders are written together in square brackets, as in
+@kihi[[x (f)]].
+
+@defform*[((define (f b ...) (t ...)) (define x t))]{
+  When given a parenthesized name @kihi[(f b ...)], define a procedure
   and bind the name @kihi[f] to it.  Invoking the name @kihi[f] will
-  execute the procedure @kihi[(t ...)].  If extra names @kihi[x ...] are
-  defined, the procedure will also consume the same number of values
-  before executing and pointwise bind those names to the values.
+  execute the procedure @kihi[(t ...)].  If @tech{binders} @kihi[b ...]
+  are given, the procedure will also consume the same number of values
+  before executing and pointwise bind them to the values.
 
   When given a bare name @kihi[x], bind @kihi[x] directly to the value
   of the expression @kihi[t].  If @kihi[t] is a parenthesized procedure
@@ -237,23 +243,28 @@ useful to use syntax that is not special-cased in the expander.
   names form the fields of the resulting struct.
 }
 
-@defform*[((λ (x ...) (t ...)) (λ x (t ...)))]{
-  A procedure that, when applied, consumes as many values as there are
-  names @kihi[x ...], and then applies the procedure @kihi[(t ...)] with
-  the names pointwise bound to the values.
+@defform*[((λ b (t ...)) (λ [b ...] (t ...)))]{
+  A procedure that, when applied, consumes a value for each of the
+  @tech{binders} @kihi[b ...], and then applies the procedure
+  @kihi[(t ...)] with the binders pointwise bound to the values.
 
-  When given a single bare name @kihi[x], equivalent to @kihi[(λ (x) (t ...))].
+  When given a single binder @kihi[b], equivalent to @kihi[(λ [b] (t ...))].
 }
 
-@defform*[((let x t ...) (let (x ...) t ...))]{
-  Binds @kihi[x] to the first value produced by the terms @kihi[t ...],
-  which are all evaluated with @kihi[x] in scope.  @kihi[x] may appear
-  in the terms that define it, enabling recursive and self-referential
-  definitions.
+@defform*[((let b t ...) (let [b ...] t ...) (let (f b ...) (u ...) t ...))]{
+  Binds the @tech{binder} @kihi[b] to the first value produced by the
+  terms @kihi[t ...], which are all evaluated with @kihi[b] in scope.
+  The name may appear in the terms that define it, enabling recursive
+  and self-referential definitions.
 
-  When given a list of names @kihi[(x ...)], binds each name to successive
+  When given a list of binders @kihi[[b ...]], binds each to successive
   values produced by the terms, in order.  All names are in scope for the
   full terms, enabling mutual recursion.
+
+  When given a parenthesized name @kihi[(f b ...)] with at least one
+  binder, binds @kihi[f] to the local procedure @kihi[(u ...)] in the same
+  way as @racket[define], and evaluates the terms @kihi[t ...] with
+  @kihi[f] in scope.  The procedure may refer to @kihi[f] recursively.
 }
 
 @defform[(match ([p t ...] ...))]{
