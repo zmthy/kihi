@@ -179,9 +179,14 @@
   (define (no-execute-bindings bindings)
     (foldr no-execute-binding empty bindings))
 
+  ;; A procedure body is a term in round parentheses: square brackets are
+  ;; reserved for lists of binders.
+  (define (check-body who body)
+    (unless (and (syntax->list body) (not (square? body)))
+      (raise-syntax-error who "expected a parenthesized procedure body" body)))
+
   (define (expand-procedure who bindings body)
-    (unless (syntax->list body)
-      (raise-syntax-error who "expected a parenthesized procedure body" body))
+    (check-body who body)
     (let-values ([(def-forms expr-forms) (expand-form body)])
       #`(λ (#,@(map flatten-binding bindings) . args)
           (let #,(no-execute-bindings bindings)
@@ -213,8 +218,7 @@
 
   (define (expand-lambda bindings body)
     (let ([params (binders 'λ bindings)])
-      (unless (syntax->list body)
-        (raise-syntax-error 'λ "expected a parenthesized procedure body" body))
+      (check-body 'λ body)
       (let-values ([(def-forms expr-forms) (expand-form body)])
         #`(thunk
             (λ #,(map flatten-binding params)
